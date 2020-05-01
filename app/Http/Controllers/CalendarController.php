@@ -2,19 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class CalendarController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function __invoke(Request $request)
+    public function __construct()
     {
+        $this->middleware('auth');
+    }
+
+    public function index(Request $request)
+    {
+
+        if ( ! \Auth::user()->available_visits && \Auth::user()->role !== 'admin') {
+            return redirect()
+                ->route('disabled');
+        }
+
         $today = Carbon::today();
         $tempDate = Carbon::createFromDate($today->year, $today->month, 1);
         $calendar = [];
@@ -25,9 +31,19 @@ class CalendarController extends Controller
         $row = 0;
         do {
             for($col = 0; $col < 7; $col++) {
+
+                $from = $tempDate->clone()->hour(6);
+                $to = $tempDate->clone()->hour(23);
+
+                $booking = Booking::where('user_id', \Auth::user()->id)
+                    ->where('date', '>', $from)
+                    ->where('date', '<', $to)
+                    ->get();
+
                 $calendar[$row][$col] = [
-                    'is_active' => $tempDate->month === $today->month,
-                    'day' => $tempDate->day,
+                    'is_active' => $tempDate > $today,
+                    'booked' => ! $booking->isEmpty(),
+                    'date' => $tempDate->clone(),
                 ];
                 $tempDate->addDay();
             }
@@ -39,4 +55,27 @@ class CalendarController extends Controller
             'calendar' => $calendar,
         ]);
     }
+
+    public function day(Request $request)
+    {
+        $day = new Carbon($request->day);
+        $timestamps = [];
+
+        $start = $day->clone()->hour(7);
+        $end = $day->clone()->hour(22);
+
+        while ($start <= $end) {
+            $timestamps[] = [
+                'date' => $start->clone(),
+                'books_count' => rand(0,50),
+            ];
+            $start->addHour();
+        }
+
+        return view('day', [
+            'day' => $day,
+            'timestamps' => $timestamps,
+        ]);
+    }
+
 }

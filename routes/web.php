@@ -16,5 +16,17 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes();
 
-Route::get('/', 'CalendarController')
+Route::get('/home', function () {
+    return redirect()->route('calendar');
+})->name('home');
+
+Route::get('/', 'CalendarController@index')
     ->name('calendar');
+
+Route::get('/day/{day}', 'CalendarController@day')
+    ->name('day');
+
+Route::get('/disabled', function () {return view('disabled');})
+    ->name('disabled');
+
+Route::resource('booking', 'BookingController');

@@ -3,11 +3,9 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-8 mt-5">
 
-            <h1 class="w3-text-teal text-center">
-                {{ $today->format('F Y') }}
-            </h1>
+            <h1 class="text-center">{{ $today->format('F Y') }}</h1>
 
             <table class="table">
                 <thead>
@@ -26,10 +24,25 @@
                     @foreach($calendar as $row)
                         <tr>
                             @foreach($row as $col)
-                                <td class="{{ $col['is_active'] ? '' : 'text-secondary' }}">
-                                    <span class="date">
-                                        {{ $col['day'] }}
-                                    </span>
+                                <td>
+                                    @if($col['booked'] || !$col['is_active'])
+                                        <div>
+                                            {{ $col['date']->day }}
+                                        </div>
+                                        <div class="btn btn-secondary disabled btn-sm">
+                                            Booked
+                                        </div>
+                                    @else
+                                        <div>
+                                            {{ $col['date']->day }}
+                                        </div>
+                                        <a
+                                            href="{{ route('day', ['day' => $col['date']->format('d-m-Y')]) }}"
+                                            class="btn btn-primary btn-sm"
+                                        >
+                                            Book
+                                        </a>
+                                    @endif
                                 </td>
                             @endforeach
                         </tr>
