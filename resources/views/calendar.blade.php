@@ -5,6 +5,12 @@
     <div class="row justify-content-center">
         <div class="col-md-8 mt-5">
 
+            @if(!\Auth::user()->available_visits)
+                <div class="alert alert-danger">
+                    You have not available visits. Please buy more.
+                </div>
+            @endif
+
             <h1 class="text-center">{{ $today->format('F Y') }}</h1>
 
             <table class="table">
@@ -25,17 +31,18 @@
                         <tr>
                             @foreach($row as $col)
                                 <td>
-                                    @if($col['booked'] || !$col['is_active'])
-                                        <div>
-                                            {{ $col['date']->day }}
+                                    <div>
+                                        {{ $col['date']->day }}
+                                    </div>
+                                    @if(!$col['is_active'])
+                                        <div class="btn btn-secondary disabled btn-sm">
+                                            Not available
                                         </div>
+                                    @elseif($col['booked'])
                                         <div class="btn btn-secondary disabled btn-sm">
                                             Booked
                                         </div>
                                     @else
-                                        <div>
-                                            {{ $col['date']->day }}
-                                        </div>
                                         <a
                                             href="{{ route('day', ['day' => $col['date']->format('d-m-Y')]) }}"
                                             class="btn btn-primary btn-sm"

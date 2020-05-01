@@ -29,4 +29,10 @@ Route::get('/day/{day}', 'CalendarController@day')
 Route::get('/disabled', function () {return view('disabled');})
     ->name('disabled');
 
+Route::get('/users', 'UserController@index')
+    ->name('user.index');
+
+Route::post('/users/{user}/increment', 'UserController@increment')
+    ->name('user.increment');
+
 Route::resource('booking', 'BookingController');

@@ -16,11 +16,6 @@ class CalendarController extends Controller
     public function index(Request $request)
     {
 
-        if ( ! \Auth::user()->available_visits && \Auth::user()->role !== 'admin') {
-            return redirect()
-                ->route('disabled');
-        }
-
         $today = Carbon::today();
         $tempDate = Carbon::createFromDate($today->year, $today->month, 1);
         $calendar = [];
@@ -41,7 +36,7 @@ class CalendarController extends Controller
                     ->get();
 
                 $calendar[$row][$col] = [
-                    'is_active' => $tempDate > $today,
+                    'is_active' => $tempDate > $today && \Auth::user()->available_visits,
                     'booked' => ! $booking->isEmpty(),
                     'date' => $tempDate->clone(),
                 ];
@@ -65,9 +60,14 @@ class CalendarController extends Controller
         $end = $day->clone()->hour(22);
 
         while ($start <= $end) {
+
+            $booking = Booking::where('user_id', \Auth::user()->id)
+                ->where('date', $start)
+                ->get();
+
             $timestamps[] = [
                 'date' => $start->clone(),
-                'books_count' => rand(0,50),
+                'books_count' => $booking->count(),
             ];
             $start->addHour();
         }
