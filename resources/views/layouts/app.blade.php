@@ -38,7 +38,7 @@
                                 Book
                             </a>
                         </li>
-                        @if(\Auth::user()->role === 'admin')
+                        @if(\Auth::check() && \Auth::user()->role === 'admin')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('user.index') }}">
                                     Users
